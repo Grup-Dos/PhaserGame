@@ -8,6 +8,14 @@ class GameScene extends Phaser.Scene {
         this.background=null;
         this.player=null;
         this.lastIncrement=0;
+        /*this.algo={
+            vida: 100,
+            velocidad: 100,
+            velocidadMaxima: 100,
+            velocidadMinima: 100,
+            velocidadIncremento: 100,
+            velocidadIncrementoMaxima: 100,
+        }*/
     }
     preload (){
         this.load.image('boat','../images/Barco.jpg');
@@ -17,6 +25,7 @@ class GameScene extends Phaser.Scene {
     create (){
         this.camera=this.cameras.main;
         this.cameras.main.setBounds(0, 0, this.scale.width, this.scale.height*1.2);
+        this.camera.setScroll(0, Infinity);
         this.cursors=this.input.keyboard.createCursorKeys();
         const firstImageWidth=370;
         const firstImageHeight=100;
@@ -29,14 +38,13 @@ class GameScene extends Phaser.Scene {
             
         {   //Player
             this.player= this.physics.add.sprite(firstImageWidth, firstImageHeight,'canya')
-                .setScale(0.1)
-                .updateBounds();
+                .setScale(0.1);
             this.player.setCollideWorldBounds(true);
         }
         {   //Camera
             this.camera.startFollow(this.player);
-            this.camera.setFollowOffset(0, 30);
         }
+        //nomObjecta.destroy();
         }
     update (){
         if(this.cursors.down.isDown) {
