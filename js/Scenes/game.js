@@ -24,11 +24,14 @@ class GameScene extends Phaser.Scene {
     }
     create (){
         this.camera=this.cameras.main;
-        this.cameras.main.setBounds(0, 0, this.scale.width, this.scale.height*1.2);
-        this.camera.setScroll(0, Infinity);
+        this.camera.setBounds(0, 0, this.scale.width, this.scale.height*1.2);
+        this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height*1,2);
+
         this.cursors=this.input.keyboard.createCursorKeys();
+
         const firstImageWidth=370;
         const firstImageHeight=100;
+        
         const image = this.add.image(firstImageWidth, firstImageHeight, 'boat');  // Colocar la imagen en la esquina superior izquierda
         image.setScale(0.5);
 
@@ -43,6 +46,7 @@ class GameScene extends Phaser.Scene {
         }
         {   //Camera
             this.camera.startFollow(this.player);
+            this.camera.setFollowOffset(0, 30);
         }
         //nomObjecta.destroy();
         }
@@ -73,6 +77,6 @@ class GameScene extends Phaser.Scene {
             this.metros=0;
             this.lastIncrementPosition = null;
         }
-        console.log('Player y:'," ", this.player.y," ", 'Metros:', this.metros);
+        console.log('Player y:'," ", this.player.y," ", 'Metros:', this.metros," ", this.speed);
     }
 }
