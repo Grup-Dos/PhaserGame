@@ -5,7 +5,6 @@ var options = function(){
 	};
 	var load = function(){
 		var json = localStorage.getItem("config") || '{"puntsInici":1,"speed":3}';
-        console.log(json);
 		options_data = JSON.parse(json);
 	};
 	var save = function(){
@@ -43,9 +42,10 @@ var options = function(){
 			},
 			save: function(){
 				options_data.puntsInici = this.num;
-				options_data.nivell=this.velocity;
+				options_data.speed=this.velocity;
 				save();
 				loadpage("../");
+                console.log(options_data);
 			}
 		}
 	});

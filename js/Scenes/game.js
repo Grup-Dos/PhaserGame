@@ -11,11 +11,12 @@ class GameScene extends Phaser.Scene {
         this.lastIncrement=0;
         this.text = null; // Variable para almacenar el texto
         this.l_partida=null;
-        this.enemigos= [];
+        this.enemigosGroup= null;
         this.normalEnemys=['enemigo1','enemigo2','enemigo3'];
-        this.totalEnemys=10;
+        this.totalEnemys=0;
         this.puntos=0;
-        this.textPoints;
+        this.textPoints=0;
+        this.createEnemys=true;
     }
     preload (){
         this.cameras.main.setBackgroundColor('#FFFFFF');
@@ -30,10 +31,11 @@ class GameScene extends Phaser.Scene {
     create (){
         var Y1=210;
         var Y2=500;
-		/*var json = localStorage.getItem("config") || '{"puntsInici":1,"speed:9"}';
+        localStorage.clear();
+	    var json = localStorage.getItem("config") || '{"puntsInici":0,"speed":6}';
         var game_data=JSON.parse(json);
-        this.metros=game_data.puntsInici;
-        this.speed=game_data.speed;*/
+        this.puntos=game_data.puntsInici;
+        this.incrementSpeed=game_data.speed;
         { //camera settings and other settings
         this.camera=this.cameras.main;
         this.camera.setBounds(0, 0, this.scale.width, this.scale.height*3);
@@ -68,15 +70,18 @@ class GameScene extends Phaser.Scene {
         //nomObjecta.destroy();
         {  //UI
             this.text = this.add.text(10, 10, "Nivell: " + this.metros, { font: '32px Arial', fill: 'black' });
-            this.textPoints = this.add.text(620, 30, "Puntos: 0", { font: '32px Arial', fill: 'black' });
+            this.textPoints = this.add.text(620, 30, "Puntos: " +this.puntos, { font: '32px Arial', fill: 'black' });
         }
 
         { //creacion enemigos y fisicas entre ellos.
+            this.enemigosGroup = this.physics.add.group();
             this.crearEnemigos(this.normalEnemys, this.totalEnemys,Y1,Y2);
-            //Esta linea es para detectar contra quien/es hemos colisionado.
-            this.physics.add.overlap(this.player, this.enemigos.map(enemigo => enemigo.sprite), this.handleCollision, null, this);
+            this.agregarColisiones();
         }
 
+    }
+    agregarColisiones() {
+        this.physics.add.overlap(this.player, this.enemigosGroup, this.handleCollision, null, this);
     }
     
     crearEnemigos(tiposEnemigos, totalEnemigos,Y1,Y2){
@@ -93,9 +98,12 @@ class GameScene extends Phaser.Scene {
                 direccion: 1, // Dirección inicial hacia la derecha (1) o izquierda (-1)
                 tipo: tipoEnemigo
             };
-            this.enemigos.push(enemigo);
+            enemigo.sprite.setData('enemigoData', enemigo); // Guardar enemigo como dato personalizado
+            this.enemigosGroup.add(enemigo.sprite);
+
         }
     }
+
     update (){
         this.movimientoEnemigos();
         this.text.destroy(); // Eliminar el texto anterior
@@ -111,7 +119,14 @@ class GameScene extends Phaser.Scene {
         this.player.y+=this.speed;
         //this.background.tilePositionY = this.camera.scrollY*3;
         this.text.y=this.camera.scrollY;
+        this.textPoints.y=this.camera.scrollY;
         this.comprobar();
+        if((this.player.y>660 && this.player.y<1150)&& this.createEnemys){
+            this.crearEnemigos(this.normalEnemys,this.totalEnemys,400,500);
+            this.crearEnemigos(this.hardEnemys,this.totalEnemys,660,1150);
+            this.createEnemys=false;
+        }
+        console.log(this.player.y);
     }
     comprobar(){
         if (this.speed > 0 && this.player.y - this.lastIncrementPosition >= 10) {
@@ -130,25 +145,25 @@ class GameScene extends Phaser.Scene {
         //console.log('Player y:'," ", this.player.y," ", 'Metros:', this.metros," ", this.speed);
     }
 
-    movimientoEnemigos(){
-        if(this.enemigos.length > 0){
-            for (let i = 0; i < this.enemigos.length; i++) {
-                const enemigo = this.enemigos[i];
-                const velocidadX = enemigo.velocidad * enemigo.direccion;
-                enemigo.sprite.x += velocidadX;
-
-                if (enemigo.sprite.x <= 20 || enemigo.sprite.x >= this.game.config.width-20) {
-                    // Cambiar la dirección y girar la imagen
-                    enemigo.direccion *= -1;
-                    enemigo.sprite.flipX = !enemigo.sprite.flipX;
-                }
+    movimientoEnemigos() {
+        //por cada iteracion del forEach, calculamos en cada uno en funcion de su velocidad, la direccion donde irá y si toca las paredes, retorna en
+        //sentido contrario
+        this.enemigosGroup.getChildren().forEach(enemigoSprite => {
+            const enemigo = enemigoSprite.getData('enemigoData');
+            const velocidadX = enemigo.velocidad * enemigo.direccion;
+            enemigoSprite.x += velocidadX;
+            if (enemigoSprite.x <= 20 || enemigoSprite.x >= this.game.config.width - 20) {
+                // Cambiar la dirección y girar la imagen
+                enemigo.direccion *= -1;
+                enemigo.flipX = !enemigo.flipX;
             }
-        }
+        });
     }
+
     handleCollision(player, enemySprite) {
         // Obtener el tipo de enemigo colisionado
-        const enemy = this.enemigos.find(enemigo => enemigo.sprite === enemySprite);
-        const tipoEnemigo = enemy.tipo;
+        const enemy = this.enemigosGroup.getChildren().find(enemigo => enemigo === enemySprite);
+        const tipoEnemigo = enemy.texture.key;
         // Realizar acciones según el tipo de enemigo
         switch (tipoEnemigo) {
             case 'enemigo1':
@@ -167,9 +182,13 @@ class GameScene extends Phaser.Scene {
     }
     tractarColision(enemy) {
         // Obtener los puntos del enemigo
-        const puntosEnemigo = enemy.puntos;
-        this.puntos += puntosEnemigo; // Sumar los puntos del enemigo a los puntos totales
-        this.textPoints.setText('Puntos: ' + this.puntos);
-        enemy.destroy();
-    }
+        const enemigo = enemy.getData('enemigoData');
+        this.puntos = parseInt(this.puntos, 10); // Convertir this.puntos a un número entero
+        this.puntos += enemigo.puntos; // Sumar los puntos del enemigo a los puntos totales     
+        // Buscar la sprite del enemigo en el mapa y destruirla
+        enemy.destroy(); 
+        this.enemigosGroup.remove(enemy);
+        this.textPoints.destroy();
+        this.textPoints = this.add.text(620, 30, "Puntos: " + this.puntos, { font: '32px Arial', fill: 'black' });   
+     }
 }
