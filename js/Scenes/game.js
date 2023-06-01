@@ -2,6 +2,7 @@ class GameScene extends Phaser.Scene {
     constructor (){
         super('GameScene');
         this.speed=0;
+        this.speedX=3;
         this.incrementSpeed=3;
         this.cursors=null;
         this.camera=null;
@@ -18,7 +19,7 @@ class GameScene extends Phaser.Scene {
         this.rareEnemys=['gnomo,bobEsponja'];
         this.obstacles=['pedra1','pedra2','pedra3'];
         this.totalEnemys=10;
-        this.totalObstacles=5;
+        this.totalObstacles=10;
         this.puntos=0;
         this.life=250;
         this.textPoints=0;
@@ -121,7 +122,7 @@ class GameScene extends Phaser.Scene {
                 const imageName = imageNames[i];
                 this.background=this.add.tileSprite(firstImageWidth*1.1, firstImageHeight*k,0,0,imageName)
                     .setScale(1.1);
-                k+=12.75;
+                k+=12.2;
             }
             const image = this.add.image(firstImageWidth, firstImageHeight, 'boat');  // Colocar la imagen en la esquina superior izquierda
             image.setScale(0.5);
@@ -149,7 +150,7 @@ class GameScene extends Phaser.Scene {
             this.crearObstaculos(this.obstacles,this.totalObstacles,Y1,Y2,0.3);
             this.agregarObstaculosColision();
 
-            this.crearEnemigos(this.normalEnemys, this.totalEnemys,Y1,Y2,0.5);
+            this.crearEnemigos(this.normalEnemys, this.totalEnemys,Y1,Y2+200,0.5);
             this.agregarColisiones();
         }
         this.createPauseMenu();
@@ -195,6 +196,8 @@ class GameScene extends Phaser.Scene {
                 tipo: tipoObstaculo
             };
             obstaculo.sprite.setData('obstaculoData', obstaculo); // Guardar enemigo como dato personalizado
+            // Cambiar el color del sprite a rojo
+            obstaculo.sprite.setTint(0xff0000);
             this.obstaclesGroup.add(obstaculo.sprite);
         }
     }
@@ -291,13 +294,13 @@ class GameScene extends Phaser.Scene {
         let vida=0;
         switch (tiposObstaculo) {
             case 'pedra1':
-                vida=15;
+                vida=30;
                 break;
             case 'pedra2':
-                vida=20;
+                vida=40;
                 break;
             case 'pedra3':
-                vida=30;
+                vida=45;
                 break;
         }
         return vida;
@@ -321,9 +324,18 @@ class GameScene extends Phaser.Scene {
             else if(this.cursors.up.isDown) {
                 this.speed=-this.incrementSpeed;
             }
-            else 
+            else if(this.cursors.left.isDown) {
+                this.speedX=-this.incrementSpeed;
+            }
+            else if(this.cursors.right.isDown) {
+                this.speedX=+this.incrementSpeed;
+            }
+            else {
                 this.speed=0;
+                this.speedX=0;
+            }
             this.player.y+=this.speed;
+            this.player.x+=this.speedX;
             this.text.y=this.camera.scrollY;
             this.textPoints.y=this.camera.scrollY;
             this.comprobarPlayer();
