@@ -34,7 +34,7 @@ class GameScene extends Phaser.Scene {
     }
     preload (){
         this.cameras.main.setBackgroundColor('#FFFFFF');
-        this.load.image('boat','../images/Barco.jpg');
+        this.load.image('boat','../images/barca.png');
         this.load.image('background', '../images/PLACE_HOLDER_FONDO.jpg');
         this.load.image('canya', '../images/canyaPescar.png');
         this.load.image('enemigo1', '../images/peix1.png');
@@ -98,16 +98,16 @@ class GameScene extends Phaser.Scene {
     create (){
         var Y1=210;
         var Y2=500;
-	    var json = localStorage.getItem("config") || '{"puntsInici":0,"speed":3}';
+	    var json = localStorage.getItem("config") || '{"puntsInici":0,"speed":13}';
         var game_data=JSON.parse(json);
         this.puntos=game_data.puntsInici;
         this.incrementSpeed=game_data.speed;
         localStorage.clear();
         { //camera settings and other settings
         this.camera=this.cameras.main;
-        this.camera.setBounds(0, 0, this.scale.width, this.scale.height*3);
-
-        this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height*3);
+        this.camera.setBounds(0, 0, this.scale.width, this.scale.height*3.7);
+        console.log(this.scale.height*3.7);
+        this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height*3.7);
 
         this.cursors=this.input.keyboard.createCursorKeys();
 
@@ -115,16 +115,16 @@ class GameScene extends Phaser.Scene {
         const firstImageWidth=370;
         const firstImageHeight=100;
         { //Create background image
-            const image = this.add.image(firstImageWidth, firstImageHeight, 'boat');  // Colocar la imagen en la esquina superior izquierda
-            image.setScale(0.5);
-            let k=4.52;
+            let k=5.28;
             const imageNames = ['escena1', 'escena2', 'escena3'];
             for(let i=0; i<imageNames.length; i++){
                 const imageName = imageNames[i];
                 this.background=this.add.tileSprite(firstImageWidth*1.1, firstImageHeight*k,0,0,imageName)
                     .setScale(1.1);
-                k+=6.5;
+                k+=12.75;
             }
+            const image = this.add.image(firstImageWidth, firstImageHeight, 'boat');  // Colocar la imagen en la esquina superior izquierda
+            image.setScale(0.5);
         }
         {   //Player
             this.player= this.physics.add.sprite(firstImageWidth, firstImageHeight,'canya')
@@ -339,7 +339,7 @@ class GameScene extends Phaser.Scene {
                 this.createEnemys=true;
             }*/
 
-            if(this.player.y>=2669){
+            if(this.player.y>=this.scale.height*3.7-30){
                 this.player.y=160;
                 this.pescarseASiMismo=true;
             }
