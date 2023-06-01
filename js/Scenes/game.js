@@ -10,6 +10,7 @@ class GameScene extends Phaser.Scene {
         this.player=null;
         this.lastIncrement=0;
         this.text = null; // Variable para almacenar el texto
+        this.l_partida=null;
         /*this.algo={
             vida: 100,
             velocidad: 100,
@@ -25,6 +26,10 @@ class GameScene extends Phaser.Scene {
         this.load.image('canya', '../images/canyaPescar.png');
     }
     create (){
+		/*var json = localStorage.getItem("config") || '{"puntsInici":1,"speed:9"}';
+        var game_data=JSON.parse(json);
+        this.metros=game_data.puntsInici;
+        this.speed=game_data.speed;*/
         this.camera=this.cameras.main;
         this.camera.setBounds(0, 0, this.scale.width, this.scale.height*3);
         this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height*3);

@@ -1,6 +1,5 @@
 var options = function(){
 	// Aquí dins hi ha la part privada de l'objecte
-    console.log(localStorage);
 	var options_data = {
 		puntsInici:2, speed:3
 	};
