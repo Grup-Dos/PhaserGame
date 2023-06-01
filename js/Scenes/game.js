@@ -121,9 +121,8 @@ class GameScene extends Phaser.Scene {
         this.text.y=this.camera.scrollY;
         this.textPoints.y=this.camera.scrollY;
         this.comprobar();
-        if((this.player.y>660 && this.player.y<1150)&& this.createEnemys){
+        if((this.player.y>400 && this.player.y<500)&& this.createEnemys){
             this.crearEnemigos(this.normalEnemys,this.totalEnemys,400,500);
-            this.crearEnemigos(this.hardEnemys,this.totalEnemys,660,1150);
             this.createEnemys=false;
         }
         console.log(this.player.y);
