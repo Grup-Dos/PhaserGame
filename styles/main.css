@@ -96,17 +96,37 @@ input[type=number] {
     margin: auto;
 }
 
+
 .menu-object{
-	display:flex;
-    justify-content: center;
+	display:block;
 	margin-left: auto;
 	margin-right: auto;
-	width: 18.75rem;
-	height: 4.688rem;
-	font-size: 1.2rem;
-	margin-top: 0.625rem;
-    color:black !important; 
-    font-family: 'Pixellari';
+	width: 300px;
+	height: 75px;
+	font-size: 16px;
+	grid-column: 2/ 3;
+	color:black !important;
+	font-family: 'Pixellari';
+}
+
+#options_id{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+    grid-auto-rows: minmax(100px, auto);
+}
+
+#title{
+    grid-column: 1/ 3;
+    grid-row:1;
+}
+
+#label1{
+    grid-row: 3/ 3;
+}
+
+#label2{
+    grid-row: 2/ 3;
 }
 
 button.menu-object:active{
