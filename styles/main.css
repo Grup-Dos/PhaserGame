@@ -1,0 +1,97 @@
+@font-face {
+    font-family: 'Pixellari';
+    src: url('../resources/Pixellari.woff2') format('woff2'),
+        url('../resources/Pixellari.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+html {
+    font-family: 'Pixellari';
+}
+
+body {
+    background: url("../resources/backmenu.gif") no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    position: relative;
+}
+
+body::after {
+    content: "";
+    background-image: url("../resources/Logo.svg");
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: -78.125rem;
+    bottom: -47rem;
+    z-index: 1;
+	transform: scale(0.12);
+}
+
+input[type=number] {
+    height: 3rem;
+    font-size: 1.3rem;
+    font-weight: bold;
+    width: 3rem;
+    text-align: center;
+}
+
+#title {
+    font-size: 6.563rem;
+    line-height: 4.688rem;
+    margin-top: 5vw;
+    margin-left: 35.938rem;
+    color: white;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.menu-object {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 18.75rem;
+    height: 4.688rem;
+    font-size: 1rem;
+    margin-top: 0.625rem;
+    font-family: 'Pixellari';
+}
+
+.button {
+    background: #5a066b00;
+    border-bottom: 0.375rem inset rgba(0, 0, 0, .5);
+    border-left: 0.375rem inset rgba(0, 0, 0, .5);
+    border-right: 0.375rem inset rgba(255, 255, 255, .5);
+    border-top: 6px inset rgba(255, 255, 255, .5);
+    box-sizing: border-box;
+    color: white;
+    cursor: pointer;
+    display: block;
+    font-size: 2.2rem;
+    min-width: 21.875rem;
+    padding: 1.25rem;
+    width: auto;
+    transition: all .2s ease;
+    margin: auto;
+    margin-bottom: 5.625rem;
+    margin-top: -3.438rem;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.button.start:hover,
+.button.options:hover,
+.button.exit:hover {
+    background-color: #ffffff50;
+    transform: scale(0.965);
+}
+
+.center {
+    margin: auto;
+}
