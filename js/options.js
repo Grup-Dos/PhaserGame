@@ -4,7 +4,8 @@ var options = function(){
 		puntsInici:2, speed:3
 	};
 	var load = function(){
-		var json = localStorage.getItem("config") || '{"puntsInici":1,"speed:3"}';
+		var json = localStorage.getItem("config") || '{"puntsInici":1,"speed":3}';
+        console.log(json);
 		options_data = JSON.parse(json);
 	};
 	var save = function(){

@@ -11,6 +11,7 @@ class GameScene extends Phaser.Scene {
         this.lastIncrement=0;
         this.text = null; // Variable para almacenar el texto
         this.l_partida=null;
+        this.enemigos= [];
         /*this.algo={
             vida: 100,
             velocidad: 100,
@@ -26,12 +27,20 @@ class GameScene extends Phaser.Scene {
         this.load.image('canya', '../images/canyaPescar.png');
     }
     create (){
+        /*
+        var Y1=210;
+        var Y2=500;
+        const normalEnemys=['enemigo1','enemigo2','enemigo3'];
+        const totalEnemys=10;
+        this.crearEnemigos(normalEnemys, totalEnemys,Y1,Y2);
+        */
 		/*var json = localStorage.getItem("config") || '{"puntsInici":1,"speed:9"}';
         var game_data=JSON.parse(json);
         this.metros=game_data.puntsInici;
         this.speed=game_data.speed;*/
         this.camera=this.cameras.main;
         this.camera.setBounds(0, 0, this.scale.width, this.scale.height*3);
+
         this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height*3);
 
         this.cursors=this.input.keyboard.createCursorKeys();
@@ -62,7 +71,27 @@ class GameScene extends Phaser.Scene {
         //nomObjecta.destroy();
         this.text = this.add.text(10, 10, "Nivell: " + this.metros, { font: '32px Arial', fill: 'white' });
         }
+    /*crearEnemigos(tiposEnemigos, totalEnemigos,Y1,Y2){
+        for (let i = 0; i < totalEnemigos; i++) {
+            const posX = Phaser.Math.RND.between(0, this.scale.width);
+            const posY = Phaser.Math.RND.between(Y1, Y2);
+
+            const tipoEnemigo = Phaser.Math.RND.pick(tiposEnemigos);
+
+            const enemigo = {
+                sprite: this.add.image(posX, posY, tipoEnemigo),
+                puntos: Phaser.Math.RND.integerInRange(1, 100),
+                velocidad: Phaser.Math.RND.between(1, 5), // Velocidad aleatoria
+                direccion: 1, // Dirección inicial hacia la derecha (1) o izquierda (-1)
+            };
+
+            this.enemigos.push(enemigo);
+        }
+    }*/
     update (){
+        while(this.enemigos.length > 0){
+            this.movimientoEnemigos();
+        }
         this.text.destroy(); // Eliminar el texto anterior
         this.text = this.add.text(10, 10, "Nivell: " + this.metros, { font: '32px Arial', fill: 'white' });
         if(this.cursors.down.isDown) {
@@ -93,5 +122,19 @@ class GameScene extends Phaser.Scene {
             this.lastIncrementPosition = null;
         }
         //console.log('Player y:'," ", this.player.y," ", 'Metros:', this.metros," ", this.speed);
+    }
+
+    movimientoEnemigos(){
+        for (let i = 0; i < this.enemigos.length; i++) {
+            const enemigo = this.enemigos[i];
+            const velocidadX = enemigo.velocidad * enemigo.direccion;
+            enemigo.sprite.x += velocidadX;
+
+            if (enemigo.sprite.x <= 0 || enemigo.sprite.x >= this.game.config.width) {
+                // Cambiar la dirección y girar la imagen
+                enemigo.direccion *= -1;
+                enemigo.sprite.flipX = !enemigo.sprite.flipX;
+            }
+        }
     }
 }
