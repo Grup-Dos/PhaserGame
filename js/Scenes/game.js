@@ -79,7 +79,7 @@ class GameScene extends Phaser.Scene {
                     this.lifeText.destroy();
                     this.improveButton.setText('Mejorar Vida '+this.cost_HP_UP);
                     this.lifeText = this.add.text(this.scale.width/2.5, 5, "Vida: " +this.life, { font: '32px Arial', fill: 'black' });
-                    console.log('Improvement count:', this.cost_HP_UP);
+                    this.actualizarpuntos();
                 }
             });
         }
@@ -92,19 +92,25 @@ class GameScene extends Phaser.Scene {
             });
         }
         {//mejorar multiplicador button
-            /*this.crearBotones(this.multiplicadorPuntos);
+            this.improveMultiplicadorButton= this.crearBotones('Multiplicador Actual '+this.multiplicadorPuntos+ ' MultiplicadorPuntos '+this.costMultiplicadorPuntos);
             this.improveMultiplicadorButton.on('pointerup', () => {
-                if (this.isMenuVisible) {
-                    loadpage("../");
+                if (this.puntos>=this.costMultiplicadorPuntos) {
+                    this.puntos-=this.costMultiplicadorPuntos;
+                    this.multiplicadorPuntos+=0.1;
+                    this.multiplicadorPuntos = parseFloat(this.multiplicadorPuntos.toFixed(1));
+                    this.costMultiplicadorPuntos*=1.1;
+                    this.costMultiplicadorPuntos = parseFloat(this.costMultiplicadorPuntos.toFixed(0));
+                    this.improveMultiplicadorButton.setText('Multiplicador Actual '+this.multiplicadorPuntos+ 'MultiplicadorPuntos '+this.costMultiplicadorPuntos);
+                    this.actualizarpuntos();
                 }
-            });*/
+            });
         }
         // Asegurarse de que el menú esté siempre por encima de otros elementos
         this.children.bringToTop(this.menuCanvas);
         this.children.bringToTop(this.improveButton);
         this.children.bringToTop(this.exitButton);
-        //this.childern.bringToTop(this.multiplicadorPuntos);
-    }
+        this.children.bringToTop(this.improveMultiplicadorButton);
+       }
     crearBotones(text){
         // Crear los botones del menú
         const boton = this.add.text(this.cameras.main.width / 2, 0, text, {
@@ -123,7 +129,7 @@ class GameScene extends Phaser.Scene {
         const originalScale = boton.scaleX;
         // Evento al pasar el ratón por encima del botón
         boton.on('pointerover', () => {
-            boton.setScale(originalScale + 0.2); // Aumentar la escala en 0.1
+            boton.setScale(originalScale + 0.1); // Aumentar la escala en 0.1
             });
 
             // Evento al sacar el ratón fuera del botón
@@ -145,7 +151,6 @@ class GameScene extends Phaser.Scene {
         { //camera settings and other settings
         this.camera=this.cameras.main;
         this.camera.setBounds(0, 0, this.scale.width, this.scale.height*3.7);
-        console.log(this.scale.height*3.7);
         this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height*3.7);
 
         this.cursors=this.input.keyboard.createCursorKeys();
@@ -177,7 +182,7 @@ class GameScene extends Phaser.Scene {
         //nomObjecta.destroy();
         {  //UI
             this.text = this.add.text(10, 10, "Nivell: " + this.metros, { font: '32px Arial', fill: 'black' });
-            this.textPoints = this.add.text(620, 30, "Puntos: " +this.puntos, { font: '32px Arial', fill: 'black' });
+            this.textPoints = this.add.text(580, 30, "Puntos: " +this.puntos, { font: '32px Arial', fill: 'black' });
             this.lifeText = this.add.text(this.scale.width/2.5, 5, "Vida: " +this.life, { font: '32px Arial', fill: 'black' });
         }
 
@@ -202,21 +207,22 @@ class GameScene extends Phaser.Scene {
         this.paused = true;
         this.exitButton.visible = true;
         this.improveButton.visible=true;
+        this.improveMultiplicadorButton.visible=true;
       }
     
     hideMenu() {
-    this.isMenuVisible = false;
-    this.menuCanvas.visible = false;
-    this.paused = false;
-    this.exitButton.visible = false;
-    this.improveButton.visible=false;
+        this.isMenuVisible = false;
+        this.menuCanvas.visible = false;
+        this.paused = false;
+        this.exitButton.visible = false;
+        this.improveButton.visible=false;
+        this.improveMultiplicadorButton.visible=false;
     }
 
     positionMenu() {
-    const cameraCenterX = this.camera.centerX;
-    const cameraCenterY = this.camera.scrollY;
-    this.improveButton.y = (this.camera.scrollY+this.camera.centerY)-50;
-    this.exitButton.y = (this.camera.scrollY+this.camera.centerY+70)-50;
+        this.improveButton.y = (this.camera.scrollY+this.camera.centerY)-50;
+        this.improveMultiplicadorButton.y=(this.camera.scrollY+this.camera.centerY+70)-50;
+        this.exitButton.y = (this.camera.scrollY+this.camera.centerY+140)-50;
     }
       
     crearObstaculos(tiposObstaculo, totalObstaculos,Y1,Y2,escalado){
@@ -236,7 +242,6 @@ class GameScene extends Phaser.Scene {
             obstaculo.sprite.setData('obstaculoData', obstaculo); // Guardar enemigo como dato personalizado
             // Cambiar el color del sprite a rojo
             obstaculo.sprite.setTint(0xff0000);
-            this.children.bringToTop(obstaculo.sprite);
             this.obstaclesGroup.add(obstaculo.sprite);
         }
     }
@@ -297,8 +302,6 @@ class GameScene extends Phaser.Scene {
                 tipo: tipoEnemigo
             };
             enemigo.sprite.setData('enemigoData', enemigo); // Guardar enemigo como dato personalizado
-            console.log(enemigo.sprite.getData('enemigoData'));
-            this.children.bringToTop(enemigo.sprite);
             this.enemigosGroup.add(enemigo.sprite);
         }
     }
@@ -409,7 +412,7 @@ class GameScene extends Phaser.Scene {
                 alert("Has perdido con " + this.puntos + " points., vuelve a inentarlo");
                 loadpage("../");
             }
-           console.log(this.player.y);
+           //console.log(this.player.y);
         }
     }
     finalPartida(){
@@ -474,7 +477,11 @@ class GameScene extends Phaser.Scene {
         
         enemy.destroy(); 
         this.enemigosGroup.remove(enemy);
+        this.actualizarpuntos();
+    }
+
+    actualizarpuntos(){
         this.textPoints.destroy();
-        this.textPoints = this.add.text(620, 30, "Puntos: " + this.puntos, { font: '32px Arial', fill: 'black' }); 
+        this.textPoints = this.add.text(580, 10, "Puntos: " + this.puntos, { font: '32px Arial', fill: 'black' }); 
     }
 }
