@@ -16,15 +16,15 @@ class GameScene extends Phaser.Scene {
         this.obstaclesGroup=null;
         this.normalEnemys=['enemigo1','enemigo2','enemigo3'];
         this.hardEnemys=['enemigo4','enemigo5'];
-        this.rareEnemys=['gnomo,bobEsponja'];
+        this.rareEnemys=['gnomo','bobEsponja'];
         this.obstacles=['pedra1','pedra2','pedra3'];
         this.totalEnemys=10;
         this.totalObstacles=10;
         this.puntos=0;
-        this.life=250;
+        this.life=1;
+        this.maxLife=200;
         this.textPoints=0;
         this.createEnemys=true;
-        this.pescarseASiMismo=false;
         this.lifeText;
         this.paused=false;
         this.pButton = null; // Variable para almacenar el sprite del botón 'P'
@@ -32,11 +32,14 @@ class GameScene extends Phaser.Scene {
         this.isMenuVisible = false; // Variable para controlar la visibilidad del menú
         this.exitButton = null; // Variable para salir
         this.improveButton = null; // Variable para mejorar
+        this.improveMultiplicadorButton = null; // Variable para mejorar el multiplicador
+        this.cost_HP_UP=100;
+        this.costMultiplicadorPuntos=100;
+        this.multiplicadorPuntos=1;
     }
     preload (){
         this.cameras.main.setBackgroundColor('#FFFFFF');
         this.load.image('boat','../images/barca.png');
-        this.load.image('background', '../images/PLACE_HOLDER_FONDO.jpg');
         this.load.image('canya', '../images/canyaPescar.png');
         this.load.image('enemigo1', '../images/peix1.png');
         this.load.image('enemigo2', '../images/peix2.png');
@@ -51,9 +54,6 @@ class GameScene extends Phaser.Scene {
         this.load.image('escena1', '../images/escena1.png');
         this.load.image('escena2', '../images/escena2.png');
         this.load.image('escena3', '../images/escena3.png');
-
-
-
     }
     createPauseMenu(){
         this.pButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
@@ -65,41 +65,79 @@ class GameScene extends Phaser.Scene {
         this.menuCanvas.setScrollFactor(0); // El canvas se mantiene fijo en la cámara
         this.menuCanvas.visible = false; // Inicialmente oculto
         
-
-        // Crear los botones del menú
-        this.improveButton = this.add.text(this.cameras.main.width / 2, 0, 'Improve', {
-          font: '32px Arial',
-          fill: 'white',
-        }).setOrigin(0.5);
-        this.improveButton.setInteractive();
-        this.improveButton.visible = false; // Inicialmente oculto
-        this.improveButton.on('pointerup', () => {
-          //this.improvementCount += 1;
-          console.log('Improvement count:', this.improvementCount);
-        });
-    
-        this.exitButton = this.add.text(this.cameras.main.width / 2, 0, 'Exit', {
-          font: '32px Arial',
-          fill: 'white',
-        }).setOrigin(0.5);
-        this.exitButton.setInteractive();
-        this.exitButton.visible = false; // Inicialmente oculto
-        this.exitButton.on('pointerup', () => {
-            if (this.isMenuVisible) {
-                loadpage("../");
-            }
-        });
-    
+        { //Improvment Button-->
+            // Crear los botones del menú
+            this.improveButton=this.crearBotones('Mejorar Vida '+this.cost_HP_UP);
+            this.improveButton.on('pointerup', () => {
+                if(this.puntos>=this.cost_HP_UP){
+                    this.puntos-=this.cost_HP_UP;
+                    this.maxLife *= 1.1;
+                    this.maxLife = parseFloat(this.maxLife.toFixed(0));
+                    this.cost_HP_UP *= 1.1;
+                    this.cost_HP_UP = parseFloat(this.cost_HP_UP.toFixed(0));
+                    this.life=this.maxLife;
+                    this.lifeText.destroy();
+                    this.improveButton.setText('Mejorar Vida '+this.cost_HP_UP);
+                    this.lifeText = this.add.text(this.scale.width/2.5, 5, "Vida: " +this.life, { font: '32px Arial', fill: 'black' });
+                    console.log('Improvement count:', this.cost_HP_UP);
+                }
+            });
+        }
+        {//exit Button-->
+            this.exitButton=this.crearBotones("exit");
+            this.exitButton.on('pointerup', () => {
+                if (this.isMenuVisible) {
+                    loadpage("../");
+                }
+            });
+        }
+        {//mejorar multiplicador button
+            /*this.crearBotones(this.multiplicadorPuntos);
+            this.improveMultiplicadorButton.on('pointerup', () => {
+                if (this.isMenuVisible) {
+                    loadpage("../");
+                }
+            });*/
+        }
         // Asegurarse de que el menú esté siempre por encima de otros elementos
         this.children.bringToTop(this.menuCanvas);
         this.children.bringToTop(this.improveButton);
         this.children.bringToTop(this.exitButton);
+        //this.childern.bringToTop(this.multiplicadorPuntos);
     }
+    crearBotones(text){
+        // Crear los botones del menú
+        const boton = this.add.text(this.cameras.main.width / 2, 0, text, {
+            font: '32px Arial',
+            fill: 'white',
+            backgroundColor: '#333',
+            padding: {
+              left: 10,
+              right: 10,
+              top: 5,
+              bottom: 5
+            }
+          }).setOrigin(0.5);
+        boton.setInteractive();
+        // Escala original del botón
+        const originalScale = boton.scaleX;
+        // Evento al pasar el ratón por encima del botón
+        boton.on('pointerover', () => {
+            boton.setScale(originalScale + 0.2); // Aumentar la escala en 0.1
+            });
 
+            // Evento al sacar el ratón fuera del botón
+            boton.on('pointerout', () => {
+            boton.setScale(originalScale); // Restaurar la escala original
+            });
+            boton.visible = false; // Inicialmente oculto
+        return boton;
+    }
     create (){
+        this.life=this.maxLife;
         var Y1=210;
         var Y2=500;
-	    var json = localStorage.getItem("config") || '{"puntsInici":0,"speed":13}';
+	    var json = localStorage.getItem("config") || '{"puntsInici":9000,"speed":13}';
         var game_data=JSON.parse(json);
         this.puntos=game_data.puntsInici;
         this.incrementSpeed=game_data.speed;
@@ -166,20 +204,20 @@ class GameScene extends Phaser.Scene {
         this.improveButton.visible=true;
       }
     
-      hideMenu() {
-        this.isMenuVisible = false;
-        this.menuCanvas.visible = false;
-        this.paused = false;
-        this.exitButton.visible = false;
-        this.improveButton.visible=false;
-      }
+    hideMenu() {
+    this.isMenuVisible = false;
+    this.menuCanvas.visible = false;
+    this.paused = false;
+    this.exitButton.visible = false;
+    this.improveButton.visible=false;
+    }
 
-      positionMenu() {
-        const cameraCenterX = this.camera.centerX;
-        const cameraCenterY = this.camera.scrollY;
-        this.improveButton.y = (this.camera.scrollY+this.camera.centerY)-50;
-        this.exitButton.y = (this.camera.scrollY+this.camera.centerY+50)-50;
-      }
+    positionMenu() {
+    const cameraCenterX = this.camera.centerX;
+    const cameraCenterY = this.camera.scrollY;
+    this.improveButton.y = (this.camera.scrollY+this.camera.centerY)-50;
+    this.exitButton.y = (this.camera.scrollY+this.camera.centerY+70)-50;
+    }
       
     crearObstaculos(tiposObstaculo, totalObstaculos,Y1,Y2,escalado){
         for (let i = 0; i < totalObstaculos; i++) {
@@ -198,6 +236,7 @@ class GameScene extends Phaser.Scene {
             obstaculo.sprite.setData('obstaculoData', obstaculo); // Guardar enemigo como dato personalizado
             // Cambiar el color del sprite a rojo
             obstaculo.sprite.setTint(0xff0000);
+            this.children.bringToTop(obstaculo.sprite);
             this.obstaclesGroup.add(obstaculo.sprite);
         }
     }
@@ -247,6 +286,8 @@ class GameScene extends Phaser.Scene {
             const posY = Phaser.Math.RND.between(Y1, Y2);
 
             const tipoEnemigo = Phaser.Math.RND.pick(tiposEnemigos);
+            if(tipoEnemigo=== 'gnomo')
+                escalado=0.4;
             const puntuacio= this.comprobarEnemigo(tipoEnemigo);
             const enemigo = {
                 sprite: this.physics.add.sprite(posX, posY, tipoEnemigo).setScale(escalado),
@@ -256,6 +297,8 @@ class GameScene extends Phaser.Scene {
                 tipo: tipoEnemigo
             };
             enemigo.sprite.setData('enemigoData', enemigo); // Guardar enemigo como dato personalizado
+            console.log(enemigo.sprite.getData('enemigoData'));
+            this.children.bringToTop(enemigo.sprite);
             this.enemigosGroup.add(enemigo.sprite);
         }
     }
@@ -336,37 +379,44 @@ class GameScene extends Phaser.Scene {
             }
             this.player.y+=this.speed;
             this.player.x+=this.speedX;
-            this.text.y=this.camera.scrollY;
-            this.textPoints.y=this.camera.scrollY;
+            this.text.y=this.camera.scrollY+11;
+            this.textPoints.y=this.camera.scrollY+11;
+            this.lifeText.y=this.camera.scrollY+11;
             this.comprobarPlayer();
 
             if((this.player.y>650 && this.player.y<1000)&& this.createEnemys){
-                this.crearEnemigos(this.normalEnemys,this.totalEnemys,400,500,0.5);
+                //this.crearEnemigos(this.normalEnemys,this.totalEnemys,650,1000,0.5);
+                this.crearEnemigos(this.rareEnemys,5,650,1000,0.7);
                 this.createEnemys=false;
             }
-            /*else if((this.player.y>1100 && this.player.y<1500)&& !this.createEnemys){
-                this.totalEnemys=13;
-                this.crearEnemigos(this.hardEnemys,this.totalEnemys,400,500,0.5);
-                this.totalEnemys=2; this.crearEnemigos(this.hardEnemys,this.totalEnemys,1100,1500,0.5);
+           else if((this.player.y>1100 && this.player.y<1800)&& !this.createEnemys){
+                this.totalObstacles=10;
+                this.crearObstaculos(this.obstacles,this.totalObstacles,1100,1800,0.5);
+                this.totalEnemys=4; this.crearEnemigos(this.hardEnemys,this.totalEnemys,1100,1800,0.5);
                 this.createEnemys=true;
-            }*/
-
+            }
+            else if((this.player.y>1810 && this.player.y<3000)&& this.createEnemys){
+                this.crearObstaculos(this.obstacles,this.totalObstacles+8,1810,3000,0.5);
+                this.crearEnemigos(this.hardEnemys,this.totalEnemys+9,1810,3000,0.5);
+                this.crearEnemigos(this.rareEnemys,2,1810,2400,0.7);
+                this.createEnemys=false;
+            }
             if(this.player.y>=this.scale.height*3.7-30){
                 this.player.y=160;
-                this.pescarseASiMismo=true;
-            }
-            else if(this.pescarseASiMismo){
-                alert("Has ganado con " + this.puntos + " points.");            
-                loadpage("../");
+                this.finalPartida();
             }
             else if(this.life<=0){
-                alert("Has perdido con " + this.puntos + " points.");
+                alert("Has perdido con " + this.puntos + " points., vuelve a inentarlo");
                 loadpage("../");
             }
-           // console.log(this.player.y);
+           console.log(this.player.y);
         }
     }
-    
+    finalPartida(){
+        this.player.y=20;
+        alert("Has bajado tanto que te has pescado a ti mismo, has ganado con " + this.puntos + " puntos.");            
+        loadpage("../");
+    }
     //comprobar los metros en el que estamos mediante la posicion del player
     comprobarPlayer(){
         if (this.speed > 0 && this.player.y - this.lastIncrementPosition >= 10) {
@@ -381,6 +431,7 @@ class GameScene extends Phaser.Scene {
         else if(this.player.y<=200){
             this.metros=0;
             this.lastIncrementPosition = null;
+            this.createEnemys=true;
         }
     }
 
@@ -417,32 +468,13 @@ class GameScene extends Phaser.Scene {
     handleCollision(player, enemySprite) {
         // Obtener el tipo de enemigo colisionado
         const enemy = this.enemigosGroup.getChildren().find(enemigo => enemigo === enemySprite);
-        const tipoEnemigo = enemy.texture.key;
-        // Realizar acciones según el tipo de enemigo
-        switch (tipoEnemigo) {
-            case 'enemigo1':
-                // Realizar acciones para el enemigo1
-                this.tractarColision(enemy);
-                break;
-            case 'enemigo2':
-                // Realizar acciones para el enemigo2
-                this.tractarColision(enemy);
-                break;
-            case 'enemigo3':
-                // Realizar acciones para el enemigo2
-                this.tractarColision(enemy);
-                break;
-        }
-    }
-    tractarColision(enemy) {
-        // Obtener los puntos del enemigo
         const enemigo = enemy.getData('enemigoData');
         this.puntos = parseInt(this.puntos, 10); // Convertir this.puntos a un número entero
-        this.puntos += enemigo.puntos; // Sumar los puntos del enemigo a los puntos totales     
-        // Buscar la sprite del enemigo en el mapa y destruirla
+        this.puntos =(this.puntos+enemigo.puntos)*this.multiplicadorPuntos; // Sumar los puntos del enemigo a los puntos totales     
+        
         enemy.destroy(); 
         this.enemigosGroup.remove(enemy);
         this.textPoints.destroy();
-        this.textPoints = this.add.text(620, 30, "Puntos: " + this.puntos, { font: '32px Arial', fill: 'black' });   
-     }
+        this.textPoints = this.add.text(620, 30, "Puntos: " + this.puntos, { font: '32px Arial', fill: 'black' }); 
+    }
 }
