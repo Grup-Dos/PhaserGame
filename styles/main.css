@@ -1,67 +1,72 @@
+/* Implementem una font personalitzada de nom 'Pixellari', la situem en la carpeta 'resources' i definim el pes i l'estil de la pròpia font */
 @font-face {
     font-family: 'Pixellari';
     src: url('../resources/Pixellari.woff2') format('woff2'),
-        url('../resources/Pixellari.woff') format('woff');
+         url('../resources/Pixellari.woff') format('woff');
     font-weight: 500;
     font-style: normal;
     font-display: swap;
-}
-
-html {
+  }
+  
+  /* Definim la font implementada anteriorment dins de l'html */
+  html {
     font-family: 'Pixellari';
-}
-
-body {
-    background: url("../resources/backmenu.gif") no-repeat center center fixed;
-    -webkit-background-size: cover;
+  }
+  
+  /* Dissenyem body */
+  body {
+    background: url("../resources/backmenu.gif") no-repeat center center fixed; /* Situem la imatge de fons i el lloc on es troba */
+    -webkit-background-size: cover; /* Ajustem les mides */
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
     position: relative;
-}
+  }
 
-body::after {
-    content: "";
-    background-image: url("../resources/Logo.svg");
+  /* Definim com serà del contenidor on es situarà el Logo en SVG */
+  .logo-container {
+    /* El posicionem en la part central-superior de la pàgina */
+    position: absolute;
+    bottom: 24.375rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4.625rem; 
+    height: 4.625rem; 
+    background-image: url('../resources/Logo.svg'); /* Clarifiquem d'on s'extreu la imatge del logo */
+    background-size: cover; /* Ajustem més les mides */
     background-repeat: no-repeat;
     background-position: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: -78.125rem;
-    bottom: -47rem;
-    z-index: 1;
-	transform: scale(0.12);
-}
+    transition: background-image 0.3s, transform 0.3s;  /* Afegim una petita transició que suavitza l'acció del canvi de logo */
+  }
+  
+  /* En cas que el ratolí passi per sobre el logo, aquest es canviarà per al Logo2 i es farà més petit */
+  .logo-container:hover {
+    background-image: url('../resources/Logo2.svg');
+    transform: translateX(-50%) scale(0.85);
+  }
 
-input[type=number] {
-    height: 3rem;
-    font-size: 1.3rem;
-    font-weight: bold;
-    width: 3rem;
-    text-align: center;
-}
-
-
-.menu-objectInicial {
+  /* Definim l'estil del menú inicial */
+  .menu-objectInicial {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 18.75rem;
     height: 4.688rem;
     font-size: 1rem;
-    margin-top: 0.625rem;
+    margin-top: -0.625rem;
     font-family: 'Pixellari';
-}
-
-.button {
-    background: #5a066b00;
+  }
+  
+  /* Dissenyem l'estil dels botons */
+  .button {
+    /* Principalment ens centrem en el color, la definició de les cantonades dels botons, els marges i posicions internes  */
+    background: #5a066b4d;
     border-bottom: 0.375rem inset rgba(0, 0, 0, .5);
     border-left: 0.375rem inset rgba(0, 0, 0, .5);
     border-right: 0.375rem inset rgba(255, 255, 255, .5);
-    border-top: 6px inset rgba(255, 255, 255, .5);
+    border-top: 0.375rem inset rgba(255, 255, 255, .5);
     box-sizing: border-box;
-    color: white;
+    color: rgb(255, 255, 255);
     cursor: pointer;
     display: block;
     font-size: 2.2rem;
@@ -74,90 +79,98 @@ input[type=number] {
     margin-top: -3.438rem;
     background-repeat: no-repeat;
     background-position: center;
-}
-
-.button.start:hover,
-.button.options:hover,
-.button.exit:hover {
-    background-color: #ffffff50;
+  }
+  
+  /* En cas de passar amb el mouse per sobre, es canvia parcialment el color i es fa un pèl més petit  */
+  .button.start:hover,
+  .button.options:hover,
+  .button.exit:hover {
+    background-color: #ffffff70;
     transform: scale(0.965);
-}
-
-.center {
+  }
+  
+  .center {
     margin: auto;
-}
-
-
-.menu-object{
-	display:block;
-	margin-left: auto;
-	margin-right: auto;
-	width: 300px;
-	height: 75px;
-	font-size: 16px;
-	grid-column: 2/ 3;
-	color:black !important;
-	font-family: 'Pixellari';
-}
-
-#menu{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 10px;
-}
-
-.button.start,
-.button.options,
-.button.exit {
-    grid-column: 2/ 3;
-}
-
-#options_id{
+  }
+  
+    /* Definim el menú objecte i derivats */
+  .menu-object {
+    display: block;
     margin-left: auto;
-	margin-right: auto;
+    margin-right: auto;
+    width: 18.75rem;
+    height: 4.688rem;
+    font-size: 1rem;
+    grid-column: 2/ 3;
+    color: black !important;
+    font-family: 'Pixellari';
+  }
+  
+  #menu {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-gap: 10px;
-    grid-auto-rows: minmax(100px, auto);
-}
-
-#title {
+    grid-gap: 0.625rem;
+  }
+  
+  .button.start,
+  .button.options,
+  .button.exit {
+    grid-column: 2/ 3;
+  }
+  
+  #options_id {
+    margin-left: auto;
+    margin-right: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 0.625rem;
+    grid-auto-rows: minmax(6.25rem, auto);
+  }
+  
+  /* Implementem títol i el seu disseny */
+  #title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: 6.563rem;
     line-height: 4.688rem;
     margin-top: 5vw;
+    margin-left: 5.2vw;
     color: white;
     text-align: center;
     white-space: nowrap;
-}
-
-#title{
-    text-align: center;
     grid-column: 2/ 3;
-}
-
-
-
-button.options_id{
+  }
+  
+  button.options_id {
     grid-row: 2/ 3;
-}
+  }
+  
+  /* Definim l'estil dels botons del menú en cas de prèmer botó */
+  button.menu-object:active {
+    font-size: 1.125rem;
+    width: 17.188rem;
+    height: 4.375rem;
+  }
+  
+    /* Definim l'estil dels botons del menú en cas de no prèmer botó */
+  button.menu-object:hover:not(:active) {
+    font-size: 1.375rem;
+    width: 20.313rem;
+    height: 5.313rem;
+  }
 
-#label1{
-    grid-row: 2/ 4;
-}
-
-#label2{
-    grid-row: 3/ 5;
-}
-
-button.menu-object:active{
-	font-size: 18px;
-	width: 275px;
-	height: 70px;
-}
-
-button.menu-object:hover:not(:active){
-	font-size: 22px;
-	width: 325px;
-	height: 85px;
-}
-
+  /* Creem opcions per a diferents casuístiques de diverses amplades de pantalla */
+  @media (min-width: 768px) {
+    #title {
+      margin-top: 5vw;
+      margin-left: 5.2vw;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    #title {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
