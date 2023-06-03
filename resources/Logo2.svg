@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+
+  <!-- Lateral Esq. barca -->
+  <rect x="36" y="51" width="24" height="2" fill="#182ac9" transform="rotate(64 18 30)" />
+  
+  <!-- Lateral Dret. barca -->
+  <rect x="4" y="-59.7" width="24" height="2" fill="#182ac9" transform="rotate(116 18 30)" />
+  
+  <!-- Part Inferior barca horitzontal -->
+  <rect x="15" y="76.5" width="80" height="2" fill="#182ac9" />
+
+  <!-- Part Superior barca horitzontal -->
+  <rect x="5" y="55" width="100" height="2" fill="#182ac9" />
+  
+  <!-- Màstil -->
+  <rect x="45" y="10" width="2" height="46" fill="#182ac9" />
+
+  <!-- Vela 1-->
+  <rect x="28" y="-3.5" width="30" height="2" fill="#182ac9" transform="rotate(36 18 30)" />
+
+  <!-- Vela 2-->
+  <rect x="-20.8" y="-3.8" width="32" height="2" fill="#182ac9" transform="rotate(136 18 30)" />
+
+</svg>
