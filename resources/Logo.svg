@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+
   <!-- Lateral Esq. barca -->
   <rect x="36" y="51" width="24" height="2" fill="#6d3d06" transform="rotate(64 18 30)" />
   
@@ -20,7 +21,21 @@
   <!-- Vela 2-->
   <rect x="-20.8" y="-3.8" width="32" height="2" fill="#6d3d06" transform="rotate(136 18 30)" />
 
+  <!-- Cap persona-->
+  <circle cx="95" cy="34" r="6" fill="#e7c7a1" /> 
+
+  <!-- Cos persona-->
+  <rect x="94" y="38.9" width="2" height="16.1" fill="#e7c7a1" />
+
+  <!-- Canya -->
+  <rect x="-36" y="-39.5" width="14" height="2" fill="#e7c7a1" transform="rotate(135 18 30)" />
+
+  <!-- Fil canya -->
+  <rect x="78.5" y="-32" width="44" height="1" fill="#ffffff" transform="rotate(54 18 30)" />
+
 </svg>
+
+
 
 
 
