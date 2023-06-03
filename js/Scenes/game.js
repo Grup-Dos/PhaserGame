@@ -65,7 +65,7 @@ class GameScene extends Phaser.Scene {
         this.menuCanvas.setScrollFactor(0); // El canvas se mantiene fijo en la cámara
         this.menuCanvas.visible = false; // Inicialmente oculto
         
-        { //Improvment Button-->
+        { //Improvment Button Vida-->
             // Crear los botones del menú
             this.improveButton=this.crearBotones('Mejorar Vida '+this.cost_HP_UP);
             this.improveButton.on('pointerup', () => {
@@ -143,7 +143,7 @@ class GameScene extends Phaser.Scene {
         this.life=this.maxLife;
         var Y1=210;
         var Y2=500;
-	    var json = localStorage.getItem("config") || '{"puntsInici":9000,"speed":13}';
+	    var json = localStorage.getItem("config") || '{"puntsInici":1,"speed":5}';
         var game_data=JSON.parse(json);
         this.puntos=game_data.puntsInici;
         this.incrementSpeed=game_data.speed;
@@ -181,7 +181,7 @@ class GameScene extends Phaser.Scene {
         }
         //nomObjecta.destroy();
         {  //UI
-            this.text = this.add.text(10, 10, "Nivell: " + this.metros, { font: '32px Arial', fill: 'black' });
+            this.text = this.add.text(10, 10, "Profundidad: " + this.metros, { font: '32px Arial', fill: 'black' });
             this.textPoints = this.add.text(580, 30, "Puntos: " +this.puntos, { font: '32px Arial', fill: 'black' });
             this.lifeText = this.add.text(this.scale.width/2.5, 5, "Vida: " +this.life, { font: '32px Arial', fill: 'black' });
         }
@@ -255,35 +255,17 @@ class GameScene extends Phaser.Scene {
 
     handleObstacleCollision(player, obstaculo){
         const obstacle = this.obstaclesGroup.getChildren().find(OBST => OBST === obstaculo);
-        const tipoObstacle = obstacle.texture.key;
-        // Realizar acciones según el tipo de enemigo
-        switch (tipoObstacle) {
-            case 'pedra1':
-                // Realizar acciones para el enemigo1
-                this.handleobstacle(obstacle);
-                break;
-            case 'pedra2':
-                // Realizar acciones para el enemigo2
-                this.handleobstacle(obstacle);
-                break;
-            case 'pedra3':
-                // Realizar acciones para el enemigo2
-                this.handleobstacle(obstacle);
-                break;
-        }
+       // Obtener los puntos del enemigo
+       const obs = obstacle.getData('obstaculoData');
+       this.life = parseInt(this.life, 10); // Convertir this.puntos a un número entero
+       this.life -= obs.life; // Sumar los puntos del enemigo a los puntos totales     
+       // Buscar la sprite del enemigo en el mapa y destruirla
+       obstaculo.destroy(); 
+       this.obstaclesGroup.remove(obstaculo);
+       this.lifeText.destroy();
+       this.lifeText = this.add.text(this.scale.width/2.5, 5, "Vida: " +this.life, { font: '32px Arial', fill: 'black' });
     }
 
-    handleobstacle(obstaculo){
-        // Obtener los puntos del enemigo
-        const obstacle = obstaculo.getData('obstaculoData');
-        this.life = parseInt(this.life, 10); // Convertir this.puntos a un número entero
-        this.life -= obstacle.life; // Sumar los puntos del enemigo a los puntos totales     
-        // Buscar la sprite del enemigo en el mapa y destruirla
-        obstaculo.destroy(); 
-        this.obstaclesGroup.remove(obstaculo);
-        this.lifeText.destroy();
-        this.lifeText = this.add.text(this.scale.width/2.5, 5, "Vida: " +this.life, { font: '32px Arial', fill: 'black' });
-    }
     //se crean los enemigos
     crearEnemigos(tiposEnemigos, totalEnemigos,Y1,Y2,escalado){
         for (let i = 0; i < totalEnemigos; i++) {
@@ -363,7 +345,7 @@ class GameScene extends Phaser.Scene {
             this.movimientoEnemigos();
             this.movimientoObstaculos();
             this.text.destroy(); // Eliminar el texto anterior
-            this.text = this.add.text(10, 10, "Nivell: " + this.metros, { font: '32px Arial', fill: 'black' });
+            this.text = this.add.text(10, 10, "Profundidad: " + this.metros, { font: '32px Arial', fill: 'black' });
             if(this.cursors.down.isDown) {
                 this.speed=this.incrementSpeed;
             } 
@@ -394,20 +376,21 @@ class GameScene extends Phaser.Scene {
             }
            else if((this.player.y>1100 && this.player.y<1800)&& !this.createEnemys){
                 this.totalObstacles=10;
-                this.crearObstaculos(this.obstacles,this.totalObstacles,1100,1800,0.5);
-                this.totalEnemys=4; this.crearEnemigos(this.hardEnemys,this.totalEnemys,1100,1800,0.5);
+                this.crearObstaculos(this.obstacles,this.totalObstacles,1200,1900,0.5);
+                this.totalEnemys=4; this.crearEnemigos(this.hardEnemys,this.totalEnemys,1200,1900,0.5);
                 this.createEnemys=true;
             }
             else if((this.player.y>1810 && this.player.y<3000)&& this.createEnemys){
-                this.crearObstaculos(this.obstacles,this.totalObstacles+8,1810,3000,0.5);
-                this.crearEnemigos(this.hardEnemys,this.totalEnemys+9,1810,3000,0.5);
-                this.crearEnemigos(this.rareEnemys,2,1810,2400,0.7);
+                this.crearObstaculos(this.obstacles,this.totalObstacles+10,1955,3155,0.5);
+                this.crearEnemigos(this.hardEnemys,this.totalEnemys+9,1955,3155,0.5);
+                this.crearEnemigos(this.rareEnemys,4,1810,2400,0.7);
                 this.createEnemys=false;
             }
             if(this.player.y>=this.scale.height*3.7-30){
                 this.player.y=160;
                 this.finalPartida();
             }
+
             else if(this.life<=0){
                 alert("Has perdido con " + this.puntos + " points., vuelve a inentarlo");
                 loadpage("../");
@@ -415,19 +398,19 @@ class GameScene extends Phaser.Scene {
            //console.log(this.player.y);
         }
     }
+
     finalPartida(){
-        this.player.y=20;
         alert("Has bajado tanto que te has pescado a ti mismo, has ganado con " + this.puntos + " puntos.");            
         loadpage("../");
     }
     //comprobar los metros en el que estamos mediante la posicion del player
     comprobarPlayer(){
-        if (this.speed > 0 && this.player.y - this.lastIncrementPosition >= 10) {
+        if (this.speed > 0 && this.player.y - this.lastIncrementPosition >= 3) {
             // Cada vez que la cámara se desplace 10 píxeles hacia abajo, aumentamos los metros
             this.metros += 1;
             this.lastIncrementPosition = this.player.y;
         }
-        if(this.speed<0 && this.player.y - this.lastIncrementPosition <= -10){
+        if(this.speed<0 && this.player.y - this.lastIncrementPosition <= -3){
             this.metros-=1;
             this.lastIncrementPosition = this.player.y;
         }
