@@ -2,6 +2,7 @@ class GameScene extends Phaser.Scene {
     constructor (){
         super('GameScene');
         this.speed=0;
+        this.speedX=3;
         this.incrementSpeed=3;
         this.cursors=null;
         this.camera=null;
@@ -15,15 +16,15 @@ class GameScene extends Phaser.Scene {
         this.obstaclesGroup=null;
         this.normalEnemys=['enemigo1','enemigo2','enemigo3'];
         this.hardEnemys=['enemigo4','enemigo5'];
-        this.rareEnemys=['gnomo,bobEsponja'];
+        this.rareEnemys=['gnomo','bobEsponja'];
         this.obstacles=['pedra1','pedra2','pedra3'];
         this.totalEnemys=10;
-        this.totalObstacles=5;
+        this.totalObstacles=10;
         this.puntos=0;
-        this.life=250;
+        this.life=1;
+        this.maxLife=200;
         this.textPoints=0;
         this.createEnemys=true;
-        this.pescarseASiMismo=false;
         this.lifeText;
         this.paused=false;
         this.pButton = null; // Variable para almacenar el sprite del botón 'P'
@@ -31,11 +32,14 @@ class GameScene extends Phaser.Scene {
         this.isMenuVisible = false; // Variable para controlar la visibilidad del menú
         this.exitButton = null; // Variable para salir
         this.improveButton = null; // Variable para mejorar
+        this.improveMultiplicadorButton = null; // Variable para mejorar el multiplicador
+        this.cost_HP_UP=100;
+        this.costMultiplicadorPuntos=100;
+        this.multiplicadorPuntos=1;
     }
     preload (){
         this.cameras.main.setBackgroundColor('#FFFFFF');
         this.load.image('boat','../images/barca.png');
-        this.load.image('background', '../images/PLACE_HOLDER_FONDO.jpg');
         this.load.image('canya', '../images/canyaPescar.png');
         this.load.image('enemigo1', '../images/peix1.png');
         this.load.image('enemigo2', '../images/peix2.png');
@@ -50,9 +54,6 @@ class GameScene extends Phaser.Scene {
         this.load.image('escena1', '../images/escena1.png');
         this.load.image('escena2', '../images/escena2.png');
         this.load.image('escena3', '../images/escena3.png');
-
-
-
     }
     createPauseMenu(){
         this.pButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
@@ -64,41 +65,85 @@ class GameScene extends Phaser.Scene {
         this.menuCanvas.setScrollFactor(0); // El canvas se mantiene fijo en la cámara
         this.menuCanvas.visible = false; // Inicialmente oculto
         
-
-        // Crear los botones del menú
-        this.improveButton = this.add.text(this.cameras.main.width / 2, 0, 'Improve', {
-          font: '32px Arial',
-          fill: 'white',
-        }).setOrigin(0.5);
-        this.improveButton.setInteractive();
-        this.improveButton.visible = false; // Inicialmente oculto
-        this.improveButton.on('pointerup', () => {
-          //this.improvementCount += 1;
-          console.log('Improvement count:', this.improvementCount);
-        });
-    
-        this.exitButton = this.add.text(this.cameras.main.width / 2, 0, 'Exit', {
-          font: '32px Arial',
-          fill: 'white',
-        }).setOrigin(0.5);
-        this.exitButton.setInteractive();
-        this.exitButton.visible = false; // Inicialmente oculto
-        this.exitButton.on('pointerup', () => {
-            if (this.isMenuVisible) {
-                loadpage("../");
-            }
-        });
-    
+        { //Improvment Button Vida-->
+            // Crear los botones del menú
+            this.improveButton=this.crearBotones('Mejorar Vida '+this.cost_HP_UP);
+            this.improveButton.on('pointerup', () => {
+                if(this.puntos>=this.cost_HP_UP){
+                    this.puntos-=this.cost_HP_UP;
+                    this.maxLife *= 1.1;
+                    this.maxLife = parseFloat(this.maxLife.toFixed(0));
+                    this.cost_HP_UP *= 1.1;
+                    this.cost_HP_UP = parseFloat(this.cost_HP_UP.toFixed(0));
+                    this.life=this.maxLife;
+                    this.lifeText.destroy();
+                    this.improveButton.setText('Mejorar Vida '+this.cost_HP_UP);
+                    this.lifeText = this.add.text(this.scale.width/2.5, 5, "Vida: " +this.life, { font: '32px Arial', fill: 'black' });
+                    this.actualizarpuntos();
+                }
+            });
+        }
+        {//exit Button-->
+            this.exitButton=this.crearBotones("exit");
+            this.exitButton.on('pointerup', () => {
+                if (this.isMenuVisible) {
+                    loadpage("../");
+                }
+            });
+        }
+        {//mejorar multiplicador button
+            this.improveMultiplicadorButton= this.crearBotones('Multiplicador Actual '+this.multiplicadorPuntos+ ' MultiplicadorPuntos '+this.costMultiplicadorPuntos);
+            this.improveMultiplicadorButton.on('pointerup', () => {
+                if (this.puntos>=this.costMultiplicadorPuntos) {
+                    this.puntos-=this.costMultiplicadorPuntos;
+                    this.multiplicadorPuntos+=0.1;
+                    this.multiplicadorPuntos = parseFloat(this.multiplicadorPuntos.toFixed(1));
+                    this.costMultiplicadorPuntos*=1.1;
+                    this.costMultiplicadorPuntos = parseFloat(this.costMultiplicadorPuntos.toFixed(0));
+                    this.improveMultiplicadorButton.setText('Multiplicador Actual '+this.multiplicadorPuntos+ 'MultiplicadorPuntos '+this.costMultiplicadorPuntos);
+                    this.actualizarpuntos();
+                }
+            });
+        }
         // Asegurarse de que el menú esté siempre por encima de otros elementos
         this.children.bringToTop(this.menuCanvas);
         this.children.bringToTop(this.improveButton);
         this.children.bringToTop(this.exitButton);
-    }
+        this.children.bringToTop(this.improveMultiplicadorButton);
+       }
+    crearBotones(text){
+        // Crear los botones del menú
+        const boton = this.add.text(this.cameras.main.width / 2, 0, text, {
+            font: '32px Arial',
+            fill: 'white',
+            backgroundColor: '#333',
+            padding: {
+              left: 10,
+              right: 10,
+              top: 5,
+              bottom: 5
+            }
+          }).setOrigin(0.5);
+        boton.setInteractive();
+        // Escala original del botón
+        const originalScale = boton.scaleX;
+        // Evento al pasar el ratón por encima del botón
+        boton.on('pointerover', () => {
+            boton.setScale(originalScale + 0.1); // Aumentar la escala en 0.1
+            });
 
+            // Evento al sacar el ratón fuera del botón
+            boton.on('pointerout', () => {
+            boton.setScale(originalScale); // Restaurar la escala original
+            });
+            boton.visible = false; // Inicialmente oculto
+        return boton;
+    }
     create (){
+        this.life=this.maxLife;
         var Y1=210;
         var Y2=500;
-	    var json = localStorage.getItem("config") || '{"puntsInici":0,"speed":13}';
+	    var json = localStorage.getItem("config") || '{"puntsInici":1,"speed":5}';
         var game_data=JSON.parse(json);
         this.puntos=game_data.puntsInici;
         this.incrementSpeed=game_data.speed;
@@ -106,7 +151,6 @@ class GameScene extends Phaser.Scene {
         { //camera settings and other settings
         this.camera=this.cameras.main;
         this.camera.setBounds(0, 0, this.scale.width, this.scale.height*3.7);
-        console.log(this.scale.height*3.7);
         this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height*3.7);
 
         this.cursors=this.input.keyboard.createCursorKeys();
@@ -121,7 +165,7 @@ class GameScene extends Phaser.Scene {
                 const imageName = imageNames[i];
                 this.background=this.add.tileSprite(firstImageWidth*1.1, firstImageHeight*k,0,0,imageName)
                     .setScale(1.1);
-                k+=12.75;
+                k+=12.2;
             }
             const image = this.add.image(firstImageWidth, firstImageHeight, 'boat');  // Colocar la imagen en la esquina superior izquierda
             image.setScale(0.5);
@@ -137,8 +181,8 @@ class GameScene extends Phaser.Scene {
         }
         //nomObjecta.destroy();
         {  //UI
-            this.text = this.add.text(10, 10, "Nivell: " + this.metros, { font: '32px Arial', fill: 'black' });
-            this.textPoints = this.add.text(620, 30, "Puntos: " +this.puntos, { font: '32px Arial', fill: 'black' });
+            this.text = this.add.text(10, 10, "Profundidad: " + this.metros, { font: '32px Arial', fill: 'black' });
+            this.textPoints = this.add.text(580, 30, "Puntos: " +this.puntos, { font: '32px Arial', fill: 'black' });
             this.lifeText = this.add.text(this.scale.width/2.5, 5, "Vida: " +this.life, { font: '32px Arial', fill: 'black' });
         }
 
@@ -149,7 +193,7 @@ class GameScene extends Phaser.Scene {
             this.crearObstaculos(this.obstacles,this.totalObstacles,Y1,Y2,0.3);
             this.agregarObstaculosColision();
 
-            this.crearEnemigos(this.normalEnemys, this.totalEnemys,Y1,Y2,0.5);
+            this.crearEnemigos(this.normalEnemys, this.totalEnemys,Y1,Y2+200,0.5);
             this.agregarColisiones();
         }
         this.createPauseMenu();
@@ -163,22 +207,23 @@ class GameScene extends Phaser.Scene {
         this.paused = true;
         this.exitButton.visible = true;
         this.improveButton.visible=true;
+        this.improveMultiplicadorButton.visible=true;
       }
     
-      hideMenu() {
+    hideMenu() {
         this.isMenuVisible = false;
         this.menuCanvas.visible = false;
         this.paused = false;
         this.exitButton.visible = false;
         this.improveButton.visible=false;
-      }
+        this.improveMultiplicadorButton.visible=false;
+    }
 
-      positionMenu() {
-        const cameraCenterX = this.camera.centerX;
-        const cameraCenterY = this.camera.scrollY;
+    positionMenu() {
         this.improveButton.y = (this.camera.scrollY+this.camera.centerY)-50;
-        this.exitButton.y = (this.camera.scrollY+this.camera.centerY+50)-50;
-      }
+        this.improveMultiplicadorButton.y=(this.camera.scrollY+this.camera.centerY+70)-50;
+        this.exitButton.y = (this.camera.scrollY+this.camera.centerY+140)-50;
+    }
       
     crearObstaculos(tiposObstaculo, totalObstaculos,Y1,Y2,escalado){
         for (let i = 0; i < totalObstaculos; i++) {
@@ -195,6 +240,8 @@ class GameScene extends Phaser.Scene {
                 tipo: tipoObstaculo
             };
             obstaculo.sprite.setData('obstaculoData', obstaculo); // Guardar enemigo como dato personalizado
+            // Cambiar el color del sprite a rojo
+            obstaculo.sprite.setTint(0xff0000);
             this.obstaclesGroup.add(obstaculo.sprite);
         }
     }
@@ -208,35 +255,17 @@ class GameScene extends Phaser.Scene {
 
     handleObstacleCollision(player, obstaculo){
         const obstacle = this.obstaclesGroup.getChildren().find(OBST => OBST === obstaculo);
-        const tipoObstacle = obstacle.texture.key;
-        // Realizar acciones según el tipo de enemigo
-        switch (tipoObstacle) {
-            case 'pedra1':
-                // Realizar acciones para el enemigo1
-                this.handleobstacle(obstacle);
-                break;
-            case 'pedra2':
-                // Realizar acciones para el enemigo2
-                this.handleobstacle(obstacle);
-                break;
-            case 'pedra3':
-                // Realizar acciones para el enemigo2
-                this.handleobstacle(obstacle);
-                break;
-        }
+       // Obtener los puntos del enemigo
+       const obs = obstacle.getData('obstaculoData');
+       this.life = parseInt(this.life, 10); // Convertir this.puntos a un número entero
+       this.life -= obs.life; // Sumar los puntos del enemigo a los puntos totales     
+       // Buscar la sprite del enemigo en el mapa y destruirla
+       obstaculo.destroy(); 
+       this.obstaclesGroup.remove(obstaculo);
+       this.lifeText.destroy();
+       this.lifeText = this.add.text(this.scale.width/2.5, 5, "Vida: " +this.life, { font: '32px Arial', fill: 'black' });
     }
 
-    handleobstacle(obstaculo){
-        // Obtener los puntos del enemigo
-        const obstacle = obstaculo.getData('obstaculoData');
-        this.life = parseInt(this.life, 10); // Convertir this.puntos a un número entero
-        this.life -= obstacle.life; // Sumar los puntos del enemigo a los puntos totales     
-        // Buscar la sprite del enemigo en el mapa y destruirla
-        obstaculo.destroy(); 
-        this.obstaclesGroup.remove(obstaculo);
-        this.lifeText.destroy();
-        this.lifeText = this.add.text(this.scale.width/2.5, 5, "Vida: " +this.life, { font: '32px Arial', fill: 'black' });
-    }
     //se crean los enemigos
     crearEnemigos(tiposEnemigos, totalEnemigos,Y1,Y2,escalado){
         for (let i = 0; i < totalEnemigos; i++) {
@@ -244,6 +273,8 @@ class GameScene extends Phaser.Scene {
             const posY = Phaser.Math.RND.between(Y1, Y2);
 
             const tipoEnemigo = Phaser.Math.RND.pick(tiposEnemigos);
+            if(tipoEnemigo=== 'gnomo')
+                escalado=0.4;
             const puntuacio= this.comprobarEnemigo(tipoEnemigo);
             const enemigo = {
                 sprite: this.physics.add.sprite(posX, posY, tipoEnemigo).setScale(escalado),
@@ -291,13 +322,13 @@ class GameScene extends Phaser.Scene {
         let vida=0;
         switch (tiposObstaculo) {
             case 'pedra1':
-                vida=15;
+                vida=30;
                 break;
             case 'pedra2':
-                vida=20;
+                vida=40;
                 break;
             case 'pedra3':
-                vida=30;
+                vida=45;
                 break;
         }
         return vida;
@@ -314,61 +345,79 @@ class GameScene extends Phaser.Scene {
             this.movimientoEnemigos();
             this.movimientoObstaculos();
             this.text.destroy(); // Eliminar el texto anterior
-            this.text = this.add.text(10, 10, "Nivell: " + this.metros, { font: '32px Arial', fill: 'black' });
+            this.text = this.add.text(10, 10, "Profundidad: " + this.metros, { font: '32px Arial', fill: 'black' });
             if(this.cursors.down.isDown) {
                 this.speed=this.incrementSpeed;
             } 
             else if(this.cursors.up.isDown) {
                 this.speed=-this.incrementSpeed;
             }
-            else 
+            else if(this.cursors.left.isDown) {
+                this.speedX=-this.incrementSpeed;
+            }
+            else if(this.cursors.right.isDown) {
+                this.speedX=+this.incrementSpeed;
+            }
+            else {
                 this.speed=0;
+                this.speedX=0;
+            }
             this.player.y+=this.speed;
-            this.text.y=this.camera.scrollY;
-            this.textPoints.y=this.camera.scrollY;
+            this.player.x+=this.speedX;
+            this.text.y=this.camera.scrollY+11;
+            this.textPoints.y=this.camera.scrollY+11;
+            this.lifeText.y=this.camera.scrollY+11;
             this.comprobarPlayer();
 
             if((this.player.y>650 && this.player.y<1000)&& this.createEnemys){
-                this.crearEnemigos(this.normalEnemys,this.totalEnemys,400,500,0.5);
+                //this.crearEnemigos(this.normalEnemys,this.totalEnemys,650,1000,0.5);
+                this.crearEnemigos(this.rareEnemys,5,650,1000,0.7);
                 this.createEnemys=false;
             }
-            /*else if((this.player.y>1100 && this.player.y<1500)&& !this.createEnemys){
-                this.totalEnemys=13;
-                this.crearEnemigos(this.hardEnemys,this.totalEnemys,400,500,0.5);
-                this.totalEnemys=2; this.crearEnemigos(this.hardEnemys,this.totalEnemys,1100,1500,0.5);
+           else if((this.player.y>1100 && this.player.y<1800)&& !this.createEnemys){
+                this.totalObstacles=10;
+                this.crearObstaculos(this.obstacles,this.totalObstacles,1200,1900,0.5);
+                this.totalEnemys=4; this.crearEnemigos(this.hardEnemys,this.totalEnemys,1200,1900,0.5);
                 this.createEnemys=true;
-            }*/
-
+            }
+            else if((this.player.y>1810 && this.player.y<3000)&& this.createEnemys){
+                this.crearObstaculos(this.obstacles,this.totalObstacles+10,1955,3155,0.5);
+                this.crearEnemigos(this.hardEnemys,this.totalEnemys+9,1955,3155,0.5);
+                this.crearEnemigos(this.rareEnemys,4,1810,2400,0.7);
+                this.createEnemys=false;
+            }
             if(this.player.y>=this.scale.height*3.7-30){
                 this.player.y=160;
-                this.pescarseASiMismo=true;
+                this.finalPartida();
             }
-            else if(this.pescarseASiMismo){
-                alert("Has ganado con " + this.puntos + " points.");            
-                loadpage("../");
-            }
+
             else if(this.life<=0){
-                alert("Has perdido con " + this.puntos + " points.");
+                alert("Has perdido con " + this.puntos + " points., vuelve a inentarlo");
                 loadpage("../");
             }
-           // console.log(this.player.y);
+           //console.log(this.player.y);
         }
     }
-    
+
+    finalPartida(){
+        alert("Has bajado tanto que te has pescado a ti mismo, has ganado con " + this.puntos + " puntos.");            
+        loadpage("../");
+    }
     //comprobar los metros en el que estamos mediante la posicion del player
     comprobarPlayer(){
-        if (this.speed > 0 && this.player.y - this.lastIncrementPosition >= 10) {
+        if (this.speed > 0 && this.player.y - this.lastIncrementPosition >= 3) {
             // Cada vez que la cámara se desplace 10 píxeles hacia abajo, aumentamos los metros
             this.metros += 1;
             this.lastIncrementPosition = this.player.y;
         }
-        if(this.speed<0 && this.player.y - this.lastIncrementPosition <= -10){
+        if(this.speed<0 && this.player.y - this.lastIncrementPosition <= -3){
             this.metros-=1;
             this.lastIncrementPosition = this.player.y;
         }
         else if(this.player.y<=200){
             this.metros=0;
             this.lastIncrementPosition = null;
+            this.createEnemys=true;
         }
     }
 
@@ -405,32 +454,17 @@ class GameScene extends Phaser.Scene {
     handleCollision(player, enemySprite) {
         // Obtener el tipo de enemigo colisionado
         const enemy = this.enemigosGroup.getChildren().find(enemigo => enemigo === enemySprite);
-        const tipoEnemigo = enemy.texture.key;
-        // Realizar acciones según el tipo de enemigo
-        switch (tipoEnemigo) {
-            case 'enemigo1':
-                // Realizar acciones para el enemigo1
-                this.tractarColision(enemy);
-                break;
-            case 'enemigo2':
-                // Realizar acciones para el enemigo2
-                this.tractarColision(enemy);
-                break;
-            case 'enemigo3':
-                // Realizar acciones para el enemigo2
-                this.tractarColision(enemy);
-                break;
-        }
-    }
-    tractarColision(enemy) {
-        // Obtener los puntos del enemigo
         const enemigo = enemy.getData('enemigoData');
         this.puntos = parseInt(this.puntos, 10); // Convertir this.puntos a un número entero
-        this.puntos += enemigo.puntos; // Sumar los puntos del enemigo a los puntos totales     
-        // Buscar la sprite del enemigo en el mapa y destruirla
+        this.puntos =(this.puntos+enemigo.puntos)*this.multiplicadorPuntos; // Sumar los puntos del enemigo a los puntos totales     
+        
         enemy.destroy(); 
         this.enemigosGroup.remove(enemy);
+        this.actualizarpuntos();
+    }
+
+    actualizarpuntos(){
         this.textPoints.destroy();
-        this.textPoints = this.add.text(620, 30, "Puntos: " + this.puntos, { font: '32px Arial', fill: 'black' });   
-     }
+        this.textPoints = this.add.text(580, 10, "Puntos: " + this.puntos, { font: '32px Arial', fill: 'black' }); 
+    }
 }
