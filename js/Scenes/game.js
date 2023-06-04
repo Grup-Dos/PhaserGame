@@ -85,7 +85,7 @@ class GameScene extends Phaser.Scene {
             });
         }
         {//exit Button-->
-            this.exitButton=this.crearBotones("exit");
+            this.exitButton=this.crearBotones("Exit and Save");
             this.exitButton.on('pointerup', () => {
                 if (this.isMenuVisible) {
                     var partida = {
