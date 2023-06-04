@@ -95,7 +95,8 @@ class GameScene extends Phaser.Scene {
                         maxHealth: this.maxLife,
                         mutPunts: this.multiplicadorPuntos,
                         preu_h: this.cost_HP_UP,
-                        preu_m: this.costMultiplicadorPuntos
+                        preu_m: this.costMultiplicadorPuntos,
+                        metres:this.metros
                     };
                     localStorage.setItem("partida_g", JSON.stringify(partida));
                     loadpage("../");
@@ -169,6 +170,7 @@ class GameScene extends Phaser.Scene {
             this.multiplicadorPuntos=partida_data.mutPunts;
             this.costMultiplicadorPuntos=partida_data.preu_m;
             this.cost_HP_UP=partida_data.preu_h;
+            this.metros=partida_data.metres;
             localStorage.removeItem("c_partida");
         }
         localStorage.clear();
