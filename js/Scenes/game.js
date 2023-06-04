@@ -3,6 +3,7 @@ class GameScene extends Phaser.Scene {
         super('GameScene');
         this.speed=0;
         this.speedX=3;
+        this.posicioInicial=null;
         this.incrementSpeed=3;
         this.cursors=null;
         this.camera=null;
@@ -87,6 +88,16 @@ class GameScene extends Phaser.Scene {
             this.exitButton=this.crearBotones("exit");
             this.exitButton.on('pointerup', () => {
                 if (this.isMenuVisible) {
+                    var partida = {
+                        score: this.puntos,
+                        health: this.life,
+                        profunditat: this.player.y,
+                        maxHealth: this.maxLife,
+                        mutPunts: this.multiplicadorPuntos,
+                        preu_h: this.cost_HP_UP,
+                        preu_m: this.costMultiplicadorPuntos
+                    };
+                    localStorage.setItem("partida_g", JSON.stringify(partida));
                     loadpage("../");
                 }
             });
@@ -147,6 +158,19 @@ class GameScene extends Phaser.Scene {
         var game_data=JSON.parse(json);
         this.puntos=game_data.puntsInici;
         this.incrementSpeed=game_data.speed;
+        json = localStorage.getItem("c_partida");
+        if(json){
+            json = localStorage.getItem("partida_g");
+            var partida_data=JSON.parse(json);
+            this.puntos=partida_data.score;
+            this.life=partida_data.health;
+            this.posicioInicial=partida_data.profunditat;
+            this.maxLife=partida_data.maxHealth;
+            this.multiplicadorPuntos=partida_data.mutPunts;
+            this.costMultiplicadorPuntos=partida_data.preu_m;
+            this.cost_HP_UP=partida_data.preu_h;
+            localStorage.removeItem("c_partida");
+        }
         localStorage.clear();
         { //camera settings and other settings
         this.camera=this.cameras.main;
@@ -174,6 +198,9 @@ class GameScene extends Phaser.Scene {
             this.player= this.physics.add.sprite(firstImageWidth, firstImageHeight,'canya')
                 .setScale(0.1);
             this.player.setCollideWorldBounds(true);
+            if (this.posicioInicial){
+                this.player.y = this.posicioInicial;
+            }
         }
         {   //Camera
             this.camera.startFollow(this.player);
