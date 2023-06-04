@@ -393,7 +393,7 @@ class GameScene extends Phaser.Scene {
 
             else if(this.life<=0){
                 alert("Has perdido con " + this.puntos + " points., vuelve a inentarlo");
-                loadpage("../");
+                loadpage("../index.html");
             }
            //console.log(this.player.y);
         }
@@ -401,7 +401,7 @@ class GameScene extends Phaser.Scene {
 
     finalPartida(){
         alert("Has bajado tanto que te has pescado a ti mismo, has ganado con " + this.puntos + " puntos.");            
-        loadpage("../");
+        loadpage("../index.html");
     }
     //comprobar los metros en el que estamos mediante la posicion del player
     comprobarPlayer(){
